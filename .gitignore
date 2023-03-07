@@ -1,0 +1,4 @@
+foosnapper-*.tar.gz
+foosnapper-*.src.rpm
+foopkg.conf
+tmp/

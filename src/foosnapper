@@ -47,7 +47,7 @@ def read_config():
             'keep': parser.getint(section, 'keep', fallback=10),
             # btrfs options
             'path': parser.get(section, 'path', fallback=section.replace(
-                'btrfs ', '/')),
+                'btrfs ', '/').replace('/@', '/')),
             'storage': parser.get(section, 'storage',
                                   fallback='/media/foosnapper'),
         }

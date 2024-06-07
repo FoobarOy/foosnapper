@@ -50,7 +50,7 @@ release:
 	git diff --exit-code
 	git diff --cached --exit-code
 	sed -i -e "s@^\(VERSION = '\).*@\1$(VERSION)'@" src/foosnapper
-	sed -i -e "s@^\(Version:        \).*@\1$(VERSION)@" foosnapper.spec
+	rpmdev-bumpspec --comment="Upgrade to $(VERSION)" --new=$(VERSION) foosnapper.spec
 	git add src/foosnapper foosnapper.spec
 	git commit --message="v$(VERSION)"
 	git tag "v$(VERSION)"

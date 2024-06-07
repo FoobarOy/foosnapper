@@ -1,5 +1,5 @@
 Name:           foosnapper
-Version:        1.1
+Version:        1.2
 Release:        1%{?dist}
 Summary:        Automatic filesystem snapshooter
 License:        GPL-2.0-or-later
@@ -51,5 +51,8 @@ make install DESTDIR=%{buildroot}
 
 
 %changelog
+* Fri Jun 07 2024 Kim B. Heino <b@bbbs.net> - 1.2-1
+- Upgrade to 1.2
+
 * Tue Mar  7 2023 Kim B. Heino <b@bbbs.net> - 1.1-1
 - Initial version

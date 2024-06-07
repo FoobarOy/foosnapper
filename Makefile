@@ -1,4 +1,4 @@
-# Foosnapper - Automatic filesystem snapshooter
+# Foosnapper - Automatic filesystem snapshotter
 
 .PHONY: all test clean distclean install sysupdate release tar rpm
 

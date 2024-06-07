@@ -1,7 +1,7 @@
 Name:           foosnapper
 Version:        1.2
 Release:        1%{?dist}
-Summary:        Automatic filesystem snapshooter
+Summary:        Automatic filesystem snapshotter
 License:        GPL-2.0-or-later
 URL:            https://github.com/FoobarOy/foosnapper
 Source0:        https://github.com/FoobarOy/foosnapper/archive/v%{version}/foosnapper-%{version}.tar.gz
@@ -13,7 +13,7 @@ Requires:       python3
 
 
 %description
-Automatic filesystem snapshooter, supporting Stratis and Btrfs.
+Automatic filesystem snapshotter, supporting Stratis and Btrfs.
 
 
 %prep

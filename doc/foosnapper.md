@@ -8,7 +8,7 @@ date: Jun 7, 2024
 
 # NAME
 
-foosnapper - automatic filesystem snapshooter
+foosnapper - automatic filesystem snapshotter
 
 
 # SYNOPSIS
@@ -18,8 +18,8 @@ foosnapper - automatic filesystem snapshooter
 
 # DESCRIPTION
 
-**Foosnapper** is an automatic filesystem snapshooter, supporting Stratis and
-Btrfs filesystems. Snapshoot interval and retention can be configured
+**Foosnapper** is an automatic filesystem snapshotter, supporting Stratis and
+Btrfs filesystems. Snapshot interval and retention can be configured
 per filesystem.
 
 See */etc/foosnapper.conf* for example configuration and documentation.

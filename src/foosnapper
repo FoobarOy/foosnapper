@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""Automatic filesystem snapshooter.
+"""Automatic filesystem snapshotter.
 
 Licensed under GPL2 or newer.
 
@@ -126,8 +126,8 @@ def find_filesystems(config):
     return filesystems
 
 
-def take_snapshoots(config, filesystems):
-    """Take new snapshoots."""
+def take_snapshots(config, filesystems):
+    """Take new snapshots."""
     retcode = 0
     now = datetime.datetime.now()
     for pool_name in config:
@@ -169,8 +169,8 @@ def take_snapshoots(config, filesystems):
     return retcode
 
 
-def delete_snapshoots(config, filesystems):
-    """Purge old snapshoots."""
+def delete_snapshots(config, filesystems):
+    """Purge old snapshots."""
     retcode = 0
     for pool_name in config:
         fs_data = filesystems.get(pool_name)
@@ -204,8 +204,8 @@ def main():
     """Big main program to do it all."""
     config = read_config()
     filesystems = find_filesystems(config)
-    retcode = take_snapshoots(config, filesystems)
-    retcode |= delete_snapshoots(config, filesystems)
+    retcode = take_snapshots(config, filesystems)
+    retcode |= delete_snapshots(config, filesystems)
     sys.exit(retcode)
 
 

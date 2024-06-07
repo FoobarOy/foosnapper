@@ -36,6 +36,7 @@ make install DESTDIR=%{buildroot}
 
 
 %postun
+%systemd_postun foosnapper.service
 %systemd_postun_with_restart foosnapper.timer
 
 

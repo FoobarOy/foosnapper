@@ -1,29 +1,50 @@
-.PHONY: all test clean distclean install release tar rpm
+# Foosnapper - Automatic filesystem snapshooter
+
+.PHONY: all test clean distclean install sysupdate release tar rpm
+
+CURRENT_VERSION		?= $(shell grep ^VERSION src/foosnapper | awk -F\' '{ print $$2 }')
+SYSTEMD_SYSTEM_LOCATION	?= /usr/lib/systemd/system
+
+# Default target is to run tests
 
 all: test
 
+# Check source
+
 test:
-	flake8-3 src/foosnapper
-	pycodestyle-3 src/foosnapper
-	pylint-3 src/foosnapper
+	flake8 src/foosnapper
+	pycodestyle src/foosnapper
+	pylint src/foosnapper
+
+# Delete created files
 
 clean distclean:
 	rm -rf foosnapper-*.tar.gz foosnapper-*.src.rpm tmp/
 
-install:
-	mkdir -p $(PREFIX)/etc/foosnapper/
-	cp etc/foosnapper.conf $(PREFIX)/etc/foosnapper/
-	mkdir -p $(PREFIX)/usr/bin/
-	cp src/foosnapper $(PREFIX)/usr/bin/
-	mkdir -p $(PREFIX)/usr/lib/systemd/system/
-	cp systemd/foosnapper.service $(PREFIX)/usr/lib/systemd/system/
-	cp systemd/foosnapper.timer $(PREFIX)/usr/lib/systemd/system/
+# Install current source to DESTDIR
 
-### Release
+install:
+	mkdir -p $(DESTDIR)/etc/foosnapper/
+	cp etc/foosnapper.conf $(DESTDIR)/etc/foosnapper/
+	mkdir -p $(DESTDIR)/usr/bin/
+	cp src/foosnapper $(DESTDIR)/usr/bin/
+	mkdir -p $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
+	cp systemd/foosnapper.service $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
+	cp systemd/foosnapper.timer $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
+
+# Install current source to local system's root
+
+sysupdate:
+	make install DESTDIR=/
+	systemctl daemon-reload
+
+# Make new release
 
 release:
 	@if [ -z "$(VERSION)" ]; then \
-		echo "make release VERSION=x.xx"; \
+		echo "Usage: make release VERSION=x.xx"; \
+		echo; \
+		echo "Current: $(CURRENT_VERSION)"; \
 		exit 1; \
 	fi
 	git diff --exit-code
@@ -33,13 +54,15 @@ release:
 	git add src/foosnapper foosnapper.spec
 	git commit --message="v$(VERSION)"
 	git tag "v$(VERSION)"
+	@echo
+	@echo "== TODO =="
+	@echo "git push && git push --tags"
+	@echo "GitHub release: https://github.com/FoobarOy/foosnapper/releases/new"
 
 ### Build tar/rpm locally
 
-SPEC_VERSION ?= $(lastword $(shell grep ^Version: foosnapper.spec))
-
 tar: clean
-	tar cavf foosnapper-$(SPEC_VERSION).tar.gz --transform=s,,foosnapper-$(SPEC_VERSION)/, --show-transformed .gitignore *
+	tar cavf foosnapper-$(CURRENT_VERSION).tar.gz --transform=s,,foosnapper-$(CURRENT_VERSION)/, --show-transformed .gitignore *
 
 rpm: tar
 	rpmbuild -ba --define="_topdir $(CURDIR)/tmp" --define="_sourcedir $(CURDIR)" foosnapper.spec

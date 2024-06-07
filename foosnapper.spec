@@ -2,7 +2,7 @@ Name:           foosnapper
 Version:        1.1
 Release:        1%{?dist}
 Summary:        Automatic filesystem snapshooter
-License:        GPLv2+
+License:        GPL-2.0-or-later
 URL:            https://github.com/FoobarOy/foosnapper
 Source0:        https://github.com/FoobarOy/foosnapper/archive/v%{version}/foosnapper-%{version}.tar.gz
 BuildArch:      noarch
@@ -17,22 +17,22 @@ Automatic filesystem snapshooter, supporting Stratis and Btrfs.
 
 
 %prep
-%setup -q
+%autosetup -p1
 
 
 %build
 
 
 %install
-make install PREFIX=%{buildroot}
+make install DESTDIR=%{buildroot}
 
 
 %post
-%systemd_post foosnapper.timer
+%systemd_post foosnapper.service foosnapper.timer
 
 
 %preun
-%systemd_preun foosnapper.timer
+%systemd_preun foosnapper.service foosnapper.timer
 
 
 %postun

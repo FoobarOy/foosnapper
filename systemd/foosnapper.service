@@ -3,5 +3,6 @@ Description=Automatic filesystem snapshooter
 After=stratisd.service
 
 [Service]
+Type=oneshot
+ExecStart=foosnapper
 IOSchedulingClass=idle
-ExecStart=/usr/bin/foosnapper

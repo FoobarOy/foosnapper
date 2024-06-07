@@ -42,6 +42,7 @@ make install DESTDIR=%{buildroot}
 %files
 %license COPYING
 %doc README.md
+%doc %{_mandir}/man8/foosnapper.8*
 
 %dir %{_sysconfdir}/foosnapper
 %attr(0640,root,adm) %config(noreplace) %{_sysconfdir}/foosnapper/foosnapper.conf

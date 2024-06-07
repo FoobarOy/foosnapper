@@ -46,7 +46,7 @@ make install DESTDIR=%{buildroot}
 %doc %{_mandir}/man8/foosnapper.8*
 
 %dir %{_sysconfdir}/foosnapper
-%attr(0640,root,adm) %config(noreplace) %{_sysconfdir}/foosnapper/foosnapper.conf
+%config(noreplace) %{_sysconfdir}/foosnapper/foosnapper.conf
 %{_bindir}/foosnapper
 %{_unitdir}/foosnapper.service
 %{_unitdir}/foosnapper.timer

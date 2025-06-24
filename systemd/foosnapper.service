@@ -1,6 +1,7 @@
 [Unit]
 Description=Automatic filesystem snapshotter
-After=stratisd.service
+Documentation=https://github.com/FoobarOy/foosnapper
+After=stratisd.service local-fs.target
 
 [Service]
 Type=oneshot

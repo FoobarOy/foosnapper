@@ -1,9 +1,8 @@
 # Foosnapper - Automatic filesystem snapshotter
 
-.PHONY: all test clean distclean install sysupdate release tar rpm
+.PHONY: all test clean distclean install sysupdate release tar
 
 CURRENT_VERSION		?= $(shell grep ^VERSION src/foosnapper | awk -F\' '{ print $$2 }')
-SYSTEMD_SYSTEM_LOCATION	?= /usr/lib/systemd/system
 
 # Default target is to run tests
 
@@ -19,9 +18,11 @@ test:
 # Delete created files
 
 clean distclean:
-	rm -rf foosnapper-*.tar.gz foosnapper-*.src.rpm tmp/
+	rm -rf foosnapper-*.tar.gz
 
 # Install current source to DESTDIR
+
+SYSTEMD_SYSTEM_LOCATION	?= /usr/lib/systemd/system
 
 install:
 	mkdir -p $(DESTDIR)/etc/foosnapper/
@@ -54,9 +55,8 @@ release:
 	sed -i -e "s@^\(VERSION = '\).*@\1$(VERSION)'@" src/foosnapper
 	sed -i -e "s@^\(footer: .* \).*@\1$(VERSION)@" doc/foosnapper.md
 	sed -i -e "s@^\(date: \).*@\1$(shell date +'%b %d, %Y')@" doc/foosnapper.md
-	rpmdev-bumpspec --comment="Upgrade to $(VERSION)" --new=$(VERSION) foosnapper.spec
 	make --directory=doc
-	git add src/foosnapper foosnapper.spec doc/foosnapper.md doc/foosnapper.8
+	git add src/foosnapper doc/foosnapper.md doc/foosnapper.8
 	git commit --message="v$(VERSION)"
 	git tag "v$(VERSION)"
 	@echo
@@ -64,10 +64,7 @@ release:
 	@echo "git push && git push --tags"
 	@echo "GitHub release: https://github.com/FoobarOy/foosnapper/releases/new"
 
-### Build tar/rpm locally
+### Build tarball locally
 
 tar: clean
 	tar cavf foosnapper-$(CURRENT_VERSION).tar.gz --transform=s,,foosnapper-$(CURRENT_VERSION)/, --show-transformed .gitignore *
-
-rpm: tar
-	rpmbuild -ba --define="_topdir $(CURDIR)/tmp" --define="_sourcedir $(CURDIR)" foosnapper.spec

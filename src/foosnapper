@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-"""Automatic filesystem snapshotter.
+"""Foosnapper - Automatic filesystem snapshotter.
 
-Licensed under GPL2 or newer.
+Copyright 2022-2025, Kim B. Heino, Foobar Oy <b@bbbs.net>
 
-Copyright 2022-, Kim B. Heino, Foobar Oy <b@bbbs.net>
+License: GPL-2.0-or-later
 """
 
 import configparser

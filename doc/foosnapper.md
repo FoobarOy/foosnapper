@@ -2,8 +2,8 @@
 title: FOOSNAPPER
 section: 8
 header: User Manual
-footer: Foosnapper 1.3
-date: Jun 19, 2024
+footer: Foosnapper 1.4
+date: Jun 24, 2025
 ---
 
 # NAME

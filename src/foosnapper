@@ -18,14 +18,21 @@ VERSION = '1.4'
 
 
 def run_cmd(command):
-    """Run external command."""
+    """Run external command, return output and rc."""
     try:
-        return subprocess.run(command, check=True, timeout=60,
-                              capture_output=True, encoding='utf-8').stdout, 0
-    except (FileNotFoundError,
-            subprocess.CalledProcessError,
-            subprocess.TimeoutExpired):
+        proc = subprocess.run(command, check=False, timeout=60,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
+                              encoding='utf-8')
+    except (OSError, subprocess.TimeoutExpired):
         return '', 1
+    return proc.stdout, proc.returncode
+
+def print_quoted_output(output):
+    """Print output as "> " quoted for errors."""
+    for line in output.splitlines():
+        if line.strip():
+            print(f'> {line}', flush=True)
 
 
 def parse_date_time(datetime_str):
@@ -42,7 +49,7 @@ def read_config():
         if section == 'DEFAULT':
             continue
         config[section] = {
-            # common options
+            # Common options
             'interval': parser.getint(section, 'interval', fallback=30),
             'keep': parser.getint(section, 'keep', fallback=10),
             # BTRFS options
@@ -61,7 +68,9 @@ def stratis_filesystems(filesystems):
     """Find Stratis filesystems."""
     # Get list
     pool_name = []
-    output, _ = run_cmd(['stratis', 'filesystem', 'list'])
+    output, cmd_rc = run_cmd(['stratis', 'filesystem', 'list'])
+    if cmd_rc:
+        return
     for line in output.splitlines():
         items = line.split()
         if len(items) < 8 or (items[0] == 'Pool' and items[1] == 'Name'):
@@ -86,18 +95,22 @@ def stratis_filesystems(filesystems):
                 fs_data['snap'].append(name)
 
 
-def btrfs_filesystems(filesystems):
+def btrfs_filesystems(filesystems, config):
     """Find BTRFS filesystems."""
-    # Get list
-    output, _ = run_cmd(['btrfs', 'subvolume', 'list', '/'])
-    subvols = []
-    for line in output.splitlines():
-        items = line.split()
-        if len(items) < 9:
+    # Get list of all subvolumes on all configured roots
+    roots = sorted([cfg['path'] for name, cfg in config.items()
+                    if name.startswith('btrfs ')])
+    subvols = set()
+    for root in roots:
+        output, cmd_rc = run_cmd(['btrfs', 'subvolume', 'list', root])
+        if cmd_rc:
             continue
-        subvols.append(items[8])
+        for line in output.splitlines():
+            items = line.split()
+            if len(items) >= 9:
+                subvols.add(items[8].rsplit('/')[-1])
 
-    # Parse fs list to non-snaps
+    # Parse subvolume list to non-snap filesystems
     for name in sorted(subvols):
         if '-snap-' not in name:
             filesystems[f'btrfs {name}'] = {
@@ -106,14 +119,14 @@ def btrfs_filesystems(filesystems):
                 'snap': [],
             }
 
-    # Parse snaps to list, oldest first
+    # Add snaps to filesystems list, oldest first
     for fs_data in filesystems.values():
         if fs_data['type'] != 'btrfs':
             continue
         snapname = f'-snap-{fs_data["name"]}'
         for name in sorted(subvols):
             if name.endswith(snapname):
-                fs_data['snap'].append(name.rsplit('/')[-1])
+                fs_data['snap'].append(name)
 
 
 def find_filesystems(config):
@@ -122,7 +135,7 @@ def find_filesystems(config):
     if any(not name.startswith('btrfs ') for name in config):
         stratis_filesystems(filesystems)
     if any(name.startswith('btrfs ') for name in config):
-        btrfs_filesystems(filesystems)
+        btrfs_filesystems(filesystems, config)
     return filesystems
 
 
@@ -147,18 +160,19 @@ def take_snapshots(config, filesystems):
                 pathlib.Path(storage).mkdir(parents=True, exist_ok=True)
                 print(f'Taking snapshot of subvolume "{fs_data["name"]}" '
                       f'({config[pool_name]["path"]}) to "{fullname}"')
-                _, cmd_rc = run_cmd(['btrfs', 'subvolume', 'snapshot',
-                                     config[pool_name]['path'], fullname])
+                output, cmd_rc = run_cmd(['btrfs', 'subvolume', 'snapshot',
+                                          config[pool_name]['path'], fullname])
 
             else:
                 print(f'Taking snapshot of pool "{fs_data["pool"]}" '
                       f'filesystem "{fs_data["name"]}" to "{newname}"')
-                _, cmd_rc = run_cmd(['stratis', 'filesystem', 'snapshot',
-                                     fs_data['pool'], fs_data['name'],
-                                     newname])
+                output, cmd_rc = run_cmd(['stratis', 'filesystem', 'snapshot',
+                                          fs_data['pool'], fs_data['name'],
+                                          newname])
 
             if cmd_rc:
-                print(f'Error: Failed to create snapshot "{newname}"')
+                print(f'Error: Failed to create snapshot "{newname}":')
+                print_quoted_output(output)
                 retcode = 1
             else:
                 fs_data['snap'].append(newname)
@@ -180,16 +194,18 @@ def delete_snapshots(config, filesystems):
                 print(f'Deleting subvolume "{fs_data["name"]}" '
                       f'({config[pool_name]["path"]}) '
                       f'snapshot "{to_del}"')
-                _, cmd_rc = run_cmd(['btrfs', 'subvolume', 'delete', to_del])
+                output, cmd_rc = run_cmd(['btrfs', 'subvolume', 'delete',
+                                          to_del])
             else:
                 print(f'Deleting pool "{fs_data["pool"]}" '
                       f'filesystem "{fs_data["name"]}" '
                       f'snapshot "{to_del}"')
-                _, cmd_rc = run_cmd(['stratis', 'filesystem', 'destroy',
-                                     fs_data['pool'], to_del])
+                output, cmd_rc = run_cmd(['stratis', 'filesystem', 'destroy',
+                                          fs_data['pool'], to_del])
 
             if cmd_rc:
-                print(f'Error: Failed to delete snapshot "{to_del}"')
+                print(f'Error: Failed to delete snapshot "{to_del}":')
+                print_quoted_output(output)
                 retcode = 1
     return retcode
 

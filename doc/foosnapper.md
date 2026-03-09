@@ -19,7 +19,7 @@ foosnapper - automatic filesystem snapshotter
 # DESCRIPTION
 
 **Foosnapper** is an automatic filesystem snapshotter, supporting Stratis and
-Btrfs filesystems. Snapshot interval and retention can be configured
+BTRFS filesystems. Snapshot interval and retention can be configured
 per filesystem.
 
 See */etc/foosnapper.conf* for example configuration and documentation.

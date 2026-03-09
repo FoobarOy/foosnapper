@@ -22,16 +22,14 @@ clean distclean:
 
 # Install current source to DESTDIR
 
-SYSTEMD_SYSTEM_LOCATION	?= /usr/lib/systemd/system
-
 install:
 	mkdir -p $(DESTDIR)/etc/foosnapper/
 	cp etc/foosnapper.conf $(DESTDIR)/etc/foosnapper/
 	mkdir -p $(DESTDIR)/usr/bin/
 	cp src/foosnapper $(DESTDIR)/usr/bin/
-	mkdir -p $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
-	cp systemd/foosnapper.service $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
-	cp systemd/foosnapper.timer $(DESTDIR)$(SYSTEMD_SYSTEM_LOCATION)/
+	mkdir -p $(DESTDIR)/usr/lib/systemd/system/
+	cp systemd/foosnapper.service $(DESTDIR)/usr/lib/systemd/system/
+	cp systemd/foosnapper.timer $(DESTDIR)/usr/lib/systemd/system/
 	mkdir -p $(DESTDIR)/usr/share/man/man8
 	cp doc/foosnapper.8 $(DESTDIR)/usr/share/man/man8/
 
@@ -56,6 +54,7 @@ release:
 	sed -i -e "s@^\(footer: .* \).*@\1$(VERSION)@" doc/foosnapper.md
 	sed -i -e "s@^\(date: \).*@\1$(shell date +'%b %d, %Y')@" doc/foosnapper.md
 	make --directory=doc
+	git diff
 	git add src/foosnapper doc/foosnapper.md doc/foosnapper.8
 	git commit --message="v$(VERSION)"
 	git tag "v$(VERSION)"

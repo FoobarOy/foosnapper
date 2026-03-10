@@ -28,6 +28,7 @@ def run_cmd(command):
         return '', 1
     return proc.stdout, proc.returncode
 
+
 def print_quoted_output(output):
     """Print output as "> " quoted for errors."""
     for line in output.splitlines():
